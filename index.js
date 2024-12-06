@@ -33,7 +33,12 @@ app.use(cookieParser());
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cors({
     credentials: true,
-    origin: process.env.NETLIFY_URL
+    origin: [
+        'http://localhost:3000',  // Local development
+        'https://ezbookify.netlify.app',  // Production frontend URL
+        // Add any other origins you want to allow
+      ]
+    
 }));
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "bookify",
