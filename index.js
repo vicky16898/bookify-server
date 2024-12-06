@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cors({
     credentials: true,
-    origin: reactAPPURL
+    origin: process.env.NETLIFY_URL
 }));
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "bookify",
