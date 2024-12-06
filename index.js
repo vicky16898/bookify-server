@@ -11,7 +11,7 @@ const UserModel = require('./models/User');
 const NearbyPlace = require('./models/NearbyPlace');
 app.use(express.json());
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const imageDownloader = require('image-downloader');
 const multer = require('multer');
