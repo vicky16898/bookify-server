@@ -19,7 +19,6 @@ const fs = require('fs');
 
 mongoose.connect(process.env.MONGO_URL);
 const secret = 'asdfasdgasdfgasdfhgaisdh';
-const reactAPPURL = process.env.NETLIFY_URL || 'http://localhost:3000';
 
 function getUserDataFromReq(req) {
     return new Promise((resolve, reject) => {
