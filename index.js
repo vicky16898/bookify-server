@@ -51,7 +51,12 @@ if (process.env.NODE_ENV !== "development") {
 }
 app.use(session(sessionOptions));
 
-
+app.get('/hello', (req, res) => {
+    res.send('Life is good!')
+  })
+  app.get('/', (req, res) => {
+    res.send('Welcome to Full Stack Development!')
+  })
 
 app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
