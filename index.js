@@ -33,12 +33,13 @@ app.use(cookieParser());
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cors({
     credentials: true,
-    // origin: [
-    //     'http://localhost:3000',  // Local development
-    //     'https://ezbookify.netlify.app',  // Production frontend URL
-    //     // Add any other origins you want to allow
-    //   ]
-    origin: true
+    origin: [
+        'http://localhost:3000',  // Local development
+        'https://ezbookify.netlify.app',  // Production frontend URL
+        // Add any other origins you want to allow
+      ],
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
     
 }));
 const sessionOptions = {
