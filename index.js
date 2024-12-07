@@ -289,17 +289,21 @@ app.post('/bookings', async (req, res) => {
     })
 });
 
-
-
 app.get('/bookings', async (req, res) => {
     const userData = await getUserDataFromReq(req);
     res.json(await Booking.find({ user: userData.id }).populate('place'));
 });
 
+app.delete('/bookings/:id', async (req, res) => {
+    const { id } = req.params;
+    await Booking.findByIdAndDelete(id);
+    res.json({ message: 'Booking deleted successfully' });
+});
+
 app.get('/api/geocode', async (req, res) => {
     try {
         const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json`,
+            `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`,
             { params: req.query }
         );
         res.json(response.data);
@@ -312,7 +316,7 @@ app.get('/api/geocode', async (req, res) => {
 app.get('/api/nearbySearch', async (req, res) => {
     try {
         const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/place/nearbysearch/json`,
+            `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`,
             { params: req.query }
         );
         res.json(response.data);
@@ -322,10 +326,42 @@ app.get('/api/nearbySearch', async (req, res) => {
     }
 });
 
+app.get('/api/places/search', async (req, res) => {
+
+    try {
+        const { query, radius } = req.query;  // Only query and key are needed for textsearch
+        console.log(query + " " + radius);
+        if (!query || !radius) {
+            return res.status(400).json({ error: 'Missing required parameters: query, radius' });
+        }
+
+        const response = await axios.get(
+            `https://maps.googleapis.com/maps/api/place/textsearch/json?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`,
+            {
+                params: {
+                    query,
+                    radius,
+                },
+            }
+        );
+
+        if (response.data.status !== 'OK') {
+            return res.status(500).json({ error: `Google Places API Error: ${response.data.status}`, details: response.data });
+        }
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching places:', error);
+        res.status(500).json({ error: 'Failed to fetch places' });
+    }
+});
+
 app.post('/api/bookmarks', async (req, res) => {
+    console.log("req.body", req.body);
     const { token } = req.cookies;
     const { placeId, name, vicinity } = req.body;
     if (token) {
+        console.log("token is present");
         try {
             // Decode user data from the JWT token
             const userData = jwt.verify(token, secret);
@@ -355,6 +391,8 @@ app.post('/api/bookmarks', async (req, res) => {
     }
 });
 
+
+
 // Route to get all bookmarks for the logged-in user
 app.get('/api/bookmarks', async (req, res) => {
     const { token } = req.cookies;
@@ -382,6 +420,12 @@ app.get('/api/bookmarks', async (req, res) => {
     }
 });
 
+app.delete('/api/places/:id', async (req, res) => {
+    const { id } = req.params;
+    await PlaceModel.findByIdAndDelete(id);
+    res.json({ message: 'Place deleted successfully' });
+});
+
 app.delete('/api/bookmarks/:place_id', async (req, res) => {
     const { token } = req.cookies;
     const { place_id } = req.params;
@@ -406,6 +450,22 @@ app.delete('/api/bookmarks/:place_id', async (req, res) => {
     } else {
         res.status(401).json({ message: 'Unauthorized' });
     }
+});
+
+app.get('/api/users/:placeId', async (req, res) => {
+    const { placeId } = req.params;
+    const place = await PlaceModel.findById(placeId);
+    const user = await UserModel.findOne({ _id: place.owner });
+    res.json(user);
+});
+
+app.get('/api/users/places/:uid', async (req, res) => {
+    console.log("req.params", req.params);
+    const { uid } = req.params;
+    // console.log("uid", uid);
+    const places = await PlaceModel.find({ owner: uid });
+    console.log("places", places);
+    res.json(places);
 });
 
 
